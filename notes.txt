@@ -1,0 +1,7 @@
+Download the dataset from datasets by using 
+
+ds = load_dataset("bitext/Bitext-customer-support-llm-chatbot-training-dataset")
+
+Choose instruction and response as features to train and save the dataframe into csv file
+
+Then Preprocessed the csv file as tokenized the words

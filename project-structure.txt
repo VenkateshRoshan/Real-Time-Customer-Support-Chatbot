@@ -1,0 +1,24 @@
+customer-support-chatbot/
+├── data/                    # Data folder for storing datasets
+│   ├── raw/                 # Original, unprocessed datasets
+│   └── processed/           # Preprocessed datasets
+├── models/                  # Directory for saving fine-tuned models
+├── src/                     # Source code directory
+│   ├── preprocess.py        # Data preprocessing scripts
+│   ├── train.py             # Fine-tuning script for the model
+│   ├── api.py               # FastAPI app for real-time chatbot API
+│   ├── chatbot.py           # Core chatbot logic (loading model, handling queries)
+│   ├── deploy_sagemaker.py  # Script for AWS SageMaker deployment
+│   └── config.py            # Configuration file for hyperparameters
+├── tests/                   # Unit and integration tests
+│   └── test_api.py          # Test script for API responses
+├── docker/                  # Docker setup for containerized deployment
+│   ├── Dockerfile           # Dockerfile for building the chatbot image
+│   └── docker-compose.yml   # Optional docker-compose setup for local testing
+├── mlflow/                  # MLflow setup for model tracking
+│   └── mlflow_config.yml    # MLflow configuration file
+├── .github/                 # GitHub Actions workflows for CI/CD
+│   └── workflows/
+│       └── deployment.yml   # CI/CD pipeline for testing, building, and deploying
+├── requirements.txt         # Python dependencies
+└── README.md                # Documentation

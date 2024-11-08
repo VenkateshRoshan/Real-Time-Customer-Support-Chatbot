@@ -1,0 +1,9 @@
+transformers
+torch
+fastapi
+uvicorn
+mlflow
+boto3
+pytest
+pydantic
+datasets
