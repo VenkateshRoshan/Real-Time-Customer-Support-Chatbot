@@ -1,38 +1,55 @@
+import json  # Add this import
 import psutil
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
+import boto3
+from transformers import AutoTokenizer
 import gradio as gr
 import os
 from typing import List, Tuple
 
 class CustomerSupportBot:
-    def __init__(self, model_path="models/customer_support_gpt"):
+    def __init__(self, endpoint_name="customer-support-gpt-2024-11-10-00-30-03-555"):
         self.process = psutil.Process(os.getpid())
-        self.tokenizer = AutoTokenizer.from_pretrained(model_path)
-        self.model = AutoModelForCausalLM.from_pretrained(model_path)
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.model = self.model.to(self.device)
-
+        model_name = "EleutherAI/gpt-neo-125M"
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        # self.tokenizer = AutoTokenizer.from_pretrained("gpt2")  # Use the tokenizer appropriate to your model
+        self.endpoint_name = endpoint_name
+        self.sagemaker_runtime = boto3.client('runtime.sagemaker')
+        
     def generate_response(self, message: str) -> str:
         try:
             input_text = f"Instruction: {message}\nResponse:"
-            inputs = self.tokenizer(input_text, return_tensors="pt").to(self.device)
             
-            with torch.no_grad():
-                outputs = self.model.generate(
-                    **inputs,
-                    max_length=50,
-                    temperature=0.7,
-                    num_return_sequences=1,
-                    pad_token_id=self.tokenizer.pad_token_id,
-                    eos_token_id=self.tokenizer.eos_token_id,
-                    do_sample=True,
-                    top_p=0.95,
-                    top_k=50
-                )
-            
-            response = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-            return response.split("Response:")[-1].strip()
+            # Prepare payload for SageMaker endpoint
+            payload = {
+                # "inputs": inputs['input_ids'].tolist()[0],
+                'inputs': input_text,
+                # You can include other parameters if needed (e.g., attention_mask)
+            }
+            print(f'Payload: {payload}')
+            # Convert the payload to a JSON string before sending
+            json_payload = json.dumps(payload)  # Use json.dumps() to serialize the payload
+            print(f'JSON Payload: {json_payload}')
+            # Call the SageMaker endpoint for inference
+            response = self.sagemaker_runtime.invoke_endpoint(
+                EndpointName=self.endpoint_name,
+                ContentType='application/json',
+                Body=json_payload  # Send the JSON string here
+            )
+            print(f'Response: {response}')
+
+            # Process the response
+            result = response['Body'].read().decode('utf-8')
+            parsed_result = json.loads(result)
+
+            # Extract the generated text from the first element in the list
+            generated_text = parsed_result[0]['generated_text']
+
+            # Split the string to get the response part after 'Response:'
+            response = generated_text.split('Response:')[1].strip()
+
+            # return the extracted response
+            return response
         except Exception as e:
             return f"An error occurred: {str(e)}"
 
@@ -41,8 +58,6 @@ class CustomerSupportBot:
             "CPU (%)": self.process.cpu_percent(interval=1),
             "RAM (GB)": self.process.memory_info().rss / (1024 ** 3)
         }
-        if torch.cuda.is_available():
-            usage["GPU (GB)"] = torch.cuda.memory_allocated(0) / (1024 ** 3)
         return usage
 
 def create_chat_interface():
@@ -77,7 +92,7 @@ def create_chat_interface():
         
         chatbot = gr.Chatbot(
             label="Chat History",
-            height=400,
+            height=500,
             elem_classes="message-box"
         )
         
@@ -128,7 +143,7 @@ def create_chat_interface():
 if __name__ == "__main__":
     demo = create_chat_interface()
     demo.launch(
-        share=False,
+        share=True,
         server_name="0.0.0.0",  # Makes the server accessible from other machines
         server_port=7860,  # Specify the port
         debug=True

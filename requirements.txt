@@ -1,10 +1,10 @@
-transformers
+transformers=4.37
 torch
-fastapi
-uvicorn
 mlflow
 boto3
 pytest
 pydantic
 datasets
 psutil
+sagemaker
+gradio
