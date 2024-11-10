@@ -1,5 +1,5 @@
 # # Use Python 3.10 slim as base image
-# FROM python:3.10-slim
+FROM python:3.10-slim
 
 # # Set the working directory
 # WORKDIR /app
@@ -32,7 +32,7 @@
 # CMD ["python", "app.py"]
 
 # Use NVIDIA CUDA base image
-FROM nvidia/cuda:12.1.0-runtime-ubuntu20.04
+# FROM nvidia/cuda:12.1.0-runtime-ubuntu20.04
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=TRUE
