@@ -165,7 +165,7 @@ def create_chat_interface():
 if __name__ == "__main__":
     demo = create_chat_interface()
     demo.launch(
-        share=True,
+        share=False,
         server_name="0.0.0.0",  # Makes the server accessible from other machines
         server_port=7860,  # Specify the port
         debug=True
