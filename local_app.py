@@ -1,75 +1,54 @@
-import json
+import json  # Add this import
 import psutil
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
+import boto3
+from transformers import AutoTokenizer
 import gradio as gr
 import os
-import tarfile
 from typing import List, Tuple
 
 class CustomerSupportBot:
-    def __init__(self, model_path="models/customer_support_gpt"):
-        """
-        Initialize the customer support bot with the fine-tuned model.
-        
-        Args:
-            model_path (str): Path to the saved model and tokenizer
-        """
+    def __init__(self, endpoint_name="customer-support-gpt-2024-11-10-00-30-03-555"):
         self.process = psutil.Process(os.getpid())
-        self.model_path = model_path
-        self.model_file_path = os.path.join(self.model_path, "model.tar.gz")
+        model_name = "EleutherAI/gpt-neo-125M"
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        # self.tokenizer = AutoTokenizer.from_pretrained("gpt2")  # Use the tokenizer appropriate to your model
+        self.endpoint_name = endpoint_name
+        self.sagemaker_runtime = boto3.client('runtime.sagemaker')
         
-        # Download and load the model
-        self.download_and_load_model()
-
-    def download_and_load_model(self):
-        # Check if the model directory exists
-        if not os.path.exists(self.model_path):
-            os.makedirs(self.model_path)
-
-        # Download model.tar.gz from S3 if not already downloaded
-        if not os.path.exists(self.model_file_path):
-            print("Downloading model from S3...")
-            self.s3.download_file(self.bucket_name, self.model_key, self.model_file_path)
-            print("Download complete. Extracting model files...")
-
-            # Extract the model files
-            with tarfile.open(self.model_file_path, "r:gz") as tar:
-                tar.extractall(self.model_path)
-
-        # Load the model and tokenizer from extracted files
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
-        self.model = AutoModelForCausalLM.from_pretrained(self.model_path)
-        print("Model and tokenizer loaded successfully.")
-
-        # Move model to GPU if available
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.model = self.model.to(self.device)
-
-    def generate_response(self, message: str, max_length=100, temperature=0.7) -> str:
+    def generate_response(self, message: str) -> str:
         try:
             input_text = f"Instruction: {message}\nResponse:"
             
-            # Tokenize input text
-            inputs = self.tokenizer(input_text, return_tensors="pt").to(self.device)
-            
-            # Generate response using the model
-            with torch.no_grad():
-                outputs = self.model.generate(
-                    **inputs,
-                    max_length=max_length,
-                    temperature=temperature,
-                    num_return_sequences=1,
-                    pad_token_id=self.tokenizer.pad_token_id,
-                    eos_token_id=self.tokenizer.eos_token_id,
-                    do_sample=True,
-                    top_p=0.95,
-                    top_k=50
-                )
-            
-            # Decode and format the response
-            response = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-            response = response.split("Response:")[-1].strip()
+            # Prepare payload for SageMaker endpoint
+            payload = {
+                # "inputs": inputs['input_ids'].tolist()[0],
+                'inputs': input_text,
+                # You can include other parameters if needed (e.g., attention_mask)
+            }
+            print(f'Payload: {payload}')
+            # Convert the payload to a JSON string before sending
+            json_payload = json.dumps(payload)  # Use json.dumps() to serialize the payload
+            print(f'JSON Payload: {json_payload}')
+            # Call the SageMaker endpoint for inference
+            response = self.sagemaker_runtime.invoke_endpoint(
+                EndpointName=self.endpoint_name,
+                ContentType='application/json',
+                Body=json_payload  # Send the JSON string here
+            )
+            print(f'Response: {response}')
+
+            # Process the response
+            result = response['Body'].read().decode('utf-8')
+            parsed_result = json.loads(result)
+
+            # Extract the generated text from the first element in the list
+            generated_text = parsed_result[0]['generated_text']
+
+            # Split the string to get the response part after 'Response:'
+            response = generated_text.split('Response:')[1].strip()
+
+            # return the extracted response
             return response
         except Exception as e:
             return f"An error occurred: {str(e)}"
@@ -81,9 +60,8 @@ class CustomerSupportBot:
         }
         return usage
 
-
 def create_chat_interface():
-    bot = CustomerSupportBot(model_path="/app/models")
+    bot = CustomerSupportBot()
     
     def predict(message: str, history: List[Tuple[str, str]]) -> Tuple[str, List[Tuple[str, str]]]:
         if not message:

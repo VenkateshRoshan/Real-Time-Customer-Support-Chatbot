@@ -17,11 +17,11 @@ RUN pip install --no-cache-dir --upgrade pip
 RUN pip install --no-cache-dir torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cu121
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy .env file to the working directory
-COPY .env /app/.env
+# # Copy .env file to the working directory
+# COPY .env /app/.env
 
-# Set environment variables from .env file
-ENV $(cat /app/.env | xargs)
+# # Set environment variables from .env file
+# ENV $(cat /app/.env | xargs)
 
 # Expose port 7860
 EXPOSE 7860

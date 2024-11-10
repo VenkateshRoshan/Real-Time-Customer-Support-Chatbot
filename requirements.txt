@@ -1,5 +1,4 @@
 transformers==4.37
-torch
 mlflow
 boto3
 pytest
