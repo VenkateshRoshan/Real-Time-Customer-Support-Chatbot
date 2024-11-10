@@ -45,6 +45,9 @@ RUN apt-get update && \
     python3-pip \
     python3-dev \
     git \
+    libomp-dev \
+    libopenblas-dev \
+    libblas-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Set up working directory
