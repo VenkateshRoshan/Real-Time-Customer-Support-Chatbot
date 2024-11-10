@@ -57,3 +57,4 @@ class Config:
     # DVC configurations
     DVC_REMOTE_NAME = "s3-storage"
     DVC_REMOTE_URL = f"s3://{S3_BUCKET}/dvc"
+    
