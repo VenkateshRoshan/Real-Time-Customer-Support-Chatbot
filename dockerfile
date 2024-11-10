@@ -57,13 +57,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the application code and serve script
 COPY app.py .
-COPY serve .
+COPY serve.sh .
 
 # Make the serve script executable
-RUN chmod +x serve
+RUN chmod +x serve.sh
 
 # Expose the Gradio port
 EXPOSE 7860
 
 # Set entry point to the serve script
-ENTRYPOINT ["./serve"]
+ENTRYPOINT ["./serve.sh"]
