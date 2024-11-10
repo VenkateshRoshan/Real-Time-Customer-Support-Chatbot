@@ -4,6 +4,7 @@ import sagemaker
 from sagemaker.model import Model
 import argparse
 import os
+from datetime import datetime
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -25,12 +26,14 @@ def deploy_app(acc_id, region_name, role_arn, ecr_repo_name, endpoint_name="cust
     
     # Define the image URI in ECR
     ecr_image = f"{acc_id}.dkr.ecr.{region_name}.amazonaws.com/{ecr_repo_name}:latest"
+    model_name = f"customer-support-chatbot-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
 
     # Define model
     model = Model(
         image_uri=ecr_image,
         role=role_arn,
-        sagemaker_session=sagemaker_session
+        sagemaker_session=sagemaker_session,
+        model_name=model_name  # Use the compliant model name
     )
 
     # Deploy model as a SageMaker endpoint
