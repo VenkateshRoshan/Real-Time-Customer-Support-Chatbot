@@ -6,6 +6,7 @@ import gradio as gr
 import os
 import tarfile
 from typing import List, Tuple
+import boto3
 
 class CustomerSupportBot:
     def __init__(self, model_path="models/customer_support_gpt"):
@@ -18,6 +19,9 @@ class CustomerSupportBot:
         self.process = psutil.Process(os.getpid())
         self.model_path = model_path
         self.model_file_path = os.path.join(self.model_path, "model.tar.gz")
+        self.s3 = boto3.client("s3")
+        self.model_key = "models/model.tar.gz"
+        self.bucket_name = "customer-support-gpt"
         
         # Download and load the model
         self.download_and_load_model()
