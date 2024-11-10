@@ -43,7 +43,7 @@ jobs:
 
       - name: Deploy model to SageMaker
         run: |
-          python deploy_sagemaker.py \
+          python src/deploy_sagemaker.py \
             --account_id ${{ secrets.ACCOUNT_ID }} \
             --region ${{ secrets.AWS_REGION }} \
             --role_arn ${{ secrets.SAGEMAKER_ROLE_ARN }} \
