@@ -85,6 +85,7 @@ class CustomerSupportBot:
         }
         return usage
 
+
 def create_chat_interface():
     bot = CustomerSupportBot(model_path="/app/models")
     
@@ -163,52 +164,12 @@ def create_chat_interface():
         # Add keyboard shortcut for submit
         msg.change(lambda x: gr.update(interactive=bool(x.strip())), inputs=[msg], outputs=[submit])
 
-        # Add health check endpoint
-        @interface.route("/ping", methods=["GET"])
-        def ping():
-            try:
-                # Check if model and tokenizer are loaded
-                if not hasattr(bot, 'model') or not hasattr(bot, 'tokenizer'):
-                    return {"status": "unhealthy", "reason": "Model or tokenizer not loaded"}, 503
-                
-                # Check if CUDA is available and model is on the correct device
-                if torch.cuda.is_available():
-                    if not bot.model.device.type == 'cuda':
-                        return {"status": "unhealthy", "reason": "Model not on GPU"}, 503
-                
-                # Check memory usage
-                usage = bot.monitor_resources()
-                if usage["RAM (GB)"] > 30:  # Example threshold
-                    return {"status": "unhealthy", "reason": "High memory usage"}, 503
-                
-                # Try a quick model inference to ensure it's working
-                try:
-                    test_response = bot.generate_response("Test message")
-                    if test_response.startswith("An error occurred"):
-                        return {"status": "unhealthy", "reason": "Model inference failed"}, 503
-                except Exception as e:
-                    return {"status": "unhealthy", "reason": f"Model inference error: {str(e)}"}, 503
-                
-                return {
-                    "status": "healthy",
-                    "model_loaded": True,
-                    "device": bot.device,
-                    "resources": usage
-                }
-            except Exception as e:
-                return {"status": "unhealthy", "reason": str(e)}, 503
-
-        # Add secondary health endpoint
-        @interface.route("/health", methods=["GET"])
-        def health():
-            return {"status": "healthy"}
-
     return interface
 
 if __name__ == "__main__":
     demo = create_chat_interface()
     demo.launch(
-        share=False,
+        share=True,
         server_name="0.0.0.0",  # Makes the server accessible from other machines
         server_port=7860,  # Specify the port
         debug=True
