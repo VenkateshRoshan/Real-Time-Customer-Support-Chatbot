@@ -31,14 +31,15 @@ def deploy_app(acc_id, region_name, role_arn, ecr_repo_name, endpoint_name="cust
     model = Model(
         image_uri=ecr_image,
         role=role_arn,
-        sagemaker_session=sagemaker_session
+        sagemaker_session=sagemaker_session,
+        entry_point="serve",
     )
 
     # Deploy model as a SageMaker endpoint
     logger.info(f"Starting deployment of Gradio app to SageMaker endpoint {endpoint_name}...")
     predictor = model.deploy(
         initial_instance_count=1,
-        instance_type="ml.g4dn.xlarge",
+        instance_type="ml.t3.large", #"ml.g4dn.xlarge",
         endpoint_name=endpoint_name
     )
     logger.info(f"Gradio app deployed successfully to endpoint: {endpoint_name}")

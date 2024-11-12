@@ -47,7 +47,7 @@ class CustomerSupportBot:
         print("Model and tokenizer loaded successfully.")
 
         # Move model to GPU if available
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.device = "cpu" #"cuda" if torch.cuda.is_available() else "cpu"
         self.model = self.model.to(self.device)
 
     def generate_response(self, message: str, max_length=100, temperature=0.7) -> str:
@@ -170,8 +170,8 @@ if __name__ == "__main__":
     demo = create_chat_interface()
     demo.launch(
         share=True,
-        # server_name="0.0.0.0",  # Makes the server accessible from other machines
-        # server_port=7860,  # Specify the port
+        server_name="0.0.0.0",  # Makes the server accessible from other machines
+        server_port=7860,  # Specify the port
         debug=True,
-        inline=False, server_port=6006
+        inline=False#, server_port=6006
     )
