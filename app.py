@@ -171,7 +171,7 @@ if __name__ == "__main__":
     demo.launch(
         share=True,
         server_name="0.0.0.0",  # Makes the server accessible from other machines
-        server_port=7860,  # Specify the port
+        server_port=8080,  # Specify the port - updated from 7860 to 8080
         debug=True,
         inline=False#, server_port=6006
     )
