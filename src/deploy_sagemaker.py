@@ -86,7 +86,7 @@ def deploy_app(acc_id, region_name, role_arn, ecr_repo_name, endpoint_name="cust
         # Define deployment configuration
         deployment_config = {
             "initial_instance_count": 1,
-            "instance_type": "ml.m5.xlarge",
+            "instance_type": "ml.t2.xlarge",
             "endpoint_name": endpoint_name,
             "update_endpoint": True if _endpoint_exists(sagemaker_session, endpoint_name) else False
         }
