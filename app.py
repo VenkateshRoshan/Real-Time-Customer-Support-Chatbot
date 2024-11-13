@@ -50,6 +50,8 @@ class CustomerSupportBot:
         self.device = "cpu" #"cuda" if torch.cuda.is_available() else "cpu"
         self.model = self.model.to(self.device)
 
+        print(f'Model loaded on device: {self.device}')
+
     def generate_response(self, message: str, max_length=100, temperature=0.7) -> str:
         try:
             input_text = f"Instruction: {message}\nResponse:"
@@ -120,7 +122,7 @@ def create_chat_interface():
             label="Chat History",
             height=500,
             elem_classes="message-box",
-            type="messages"
+            # type="messages"
         )
         
         with gr.Row():
@@ -169,6 +171,7 @@ def create_chat_interface():
 
 if __name__ == "__main__":
     demo = create_chat_interface()
+    print("Starting Gradient server...")
     demo.launch(
         share=False,
         server_name="0.0.0.0",  # Makes the server accessible from other machines
