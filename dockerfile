@@ -31,9 +31,6 @@ FROM python:3.10-slim
 # # Run the application
 # CMD ["python", "app.py"]
 
-# Use NVIDIA CUDA base image
-# FROM nvidia/cuda:12.1.0-runtime-ubuntu20.04
-
 # Set environment variables
 ENV PYTHONUNBUFFERED=TRUE
 ENV PYTHONDONTWRITEBYTECODE=TRUE
