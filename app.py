@@ -119,7 +119,8 @@ def create_chat_interface():
         chatbot = gr.Chatbot(
             label="Chat History",
             height=500,
-            elem_classes="message-box"
+            elem_classes="message-box",
+            type="messages"
         )
         
         with gr.Row():
@@ -169,7 +170,7 @@ def create_chat_interface():
 if __name__ == "__main__":
     demo = create_chat_interface()
     demo.launch(
-        share=True,
+        share=False,
         server_name="0.0.0.0",  # Makes the server accessible from other machines
         server_port=8080,  # Specify the port - updated from 7860 to 8080
         debug=True,

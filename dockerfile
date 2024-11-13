@@ -74,7 +74,7 @@ COPY serve.sh .
 RUN chmod +x serve.sh
 
 # Expose the Gradio port
-EXPOSE 7860
+EXPOSE 8080
 
 # Set entry point to the serve script
 ENTRYPOINT ["./serve.sh"]
