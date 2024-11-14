@@ -7,6 +7,96 @@ import os
 import tarfile
 from typing import List, Tuple
 import boto3
+from flask import Flask, Response, jsonify, request
+import threading
+import psutil
+import logging
+from waitress import serve
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+class HealthCheckServer:
+    def __init__(self, bot=None):
+        self.app = Flask(__name__)
+        self.bot = bot
+        
+        # Health check endpoint
+        @self.app.route("/ping", methods=["GET"])
+        def ping():
+            try:
+                # Check system health
+                healthy = self.check_system_health()
+                if healthy:
+                    logger.info("Health check passed")
+                    return Response(response='\n', status=200, mimetype='application/json')
+                else:
+                    logger.error("Health check failed")
+                    return Response(response='\n', status=500, mimetype='application/json')
+            except Exception as e:
+                logger.error(f"Health check error: {str(e)}")
+                return Response(response='\n', status=500, mimetype='application/json')
+
+        # Inference endpoint
+        @self.app.route("/invocations", methods=["POST"])
+        def invocations():
+            try:
+                if not request.is_json:
+                    return Response(response='This predictor only supports JSON data',
+                                  status=415,
+                                  mimetype='text/plain')
+                
+                data = request.get_json()
+                message = data.get('message', '')
+                
+                if not message:
+                    return Response(response=json.dumps({"error": "No message provided"}),
+                                  status=400,
+                                  mimetype='application/json')
+                
+                response = self.bot.generate_response(message)
+                return Response(response=json.dumps({"response": response}),
+                              status=200,
+                              mimetype='application/json')
+                
+            except Exception as e:
+                logger.error(f"Inference error: {str(e)}")
+                return Response(response=json.dumps({"error": str(e)}),
+                              status=500,
+                              mimetype='application/json')
+    
+    def check_system_health(self):
+        """Check if system and model are healthy"""
+        try:
+            # Check if model is loaded
+            if self.bot and not hasattr(self.bot, 'model'):
+                logger.error("Model not loaded")
+                return False
+            
+            # Check memory usage
+            mem = psutil.virtual_memory()
+            if mem.percent > 90:
+                logger.error(f"High memory usage: {mem.percent}%")
+                return False
+            
+            # Check CPU usage
+            if psutil.cpu_percent() > 95:
+                logger.error(f"High CPU usage: {psutil.cpu_percent()}%")
+                return False
+            
+            # Log current resource usage
+            logger.info(f"System health: Memory {mem.percent}%, CPU {psutil.cpu_percent()}%")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Health check error: {str(e)}")
+            return False
+    
+    def run(self):
+        """Run the health check server"""
+        logger.info("Starting health check server on port 8080...")
+        serve(self.app, host='0.0.0.0', port=8080)
 
 class CustomerSupportBot:
     def __init__(self, model_path="models/customer_support_gpt"):
@@ -90,6 +180,11 @@ class CustomerSupportBot:
 
 def create_chat_interface():
     bot = CustomerSupportBot(model_path="/app/models")
+    
+    # Start health check server
+    health_server = HealthCheckServer(bot)
+    health_thread = threading.Thread(target=health_server.run, daemon=True)
+    health_thread.start()
 
     # Function to run initial query
     def initial_query():
@@ -188,29 +283,13 @@ def create_chat_interface():
 
     return interface
 
-from flask import Flask, jsonify
-import threading
-
-app = Flask(__name__)
-
-# Health check endpoint for SageMaker
-@app.route("/ping", methods=["GET"])
-def ping():
-    return jsonify({"status": "ok"}), 200
-
-# Start Flask app on a separate thread
-def run_flask():
-    app.run(host="0.0.0.0", port=8081)  # Different port for Flask
-
-threading.Thread(target=run_flask).start()
-
 if __name__ == "__main__":
     demo = create_chat_interface()
-    print("Starting Gradient server...")
+    print("Starting Gradio server...")
     demo.launch(
         share=False,
-        server_name="0.0.0.0",  # Makes the server accessible from other machines
-        server_port=8080,  # Specify the port - updated from 7860 to 8080
+        server_name="0.0.0.0",
+        server_port=7860,  # Changed to 7860 for Gradio
         debug=True,
-        inline=False#, server_port=6006
+        inline=False
     )
