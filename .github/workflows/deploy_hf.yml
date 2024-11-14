@@ -17,4 +17,4 @@ jobs:
       - name: Push to hub
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: git push --force https://huggingface.co/spaces/abven/Customer-Support-Chatbot main:main
+        run: git push --force https://abven:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/abven/Customer-Support-Chatbot dev_hf:main
