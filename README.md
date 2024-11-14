@@ -3,7 +3,7 @@ title: Customer Support Chatbot
 emoji: 💬
 colorFrom: blue
 colorTo: indigo
-sdk: gradio
+sdk: dockerfile_hf
 sdk_version: "3.50.2"
 app_file: app_hf.py
 pinned: false
