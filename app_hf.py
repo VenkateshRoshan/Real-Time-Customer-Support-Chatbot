@@ -94,7 +94,7 @@ class CustomerSupportBot:
 
 
 def create_chat_interface():
-    bot = CustomerSupportBot(model_path="/app/models")
+    bot = CustomerSupportBot(model_path="/models")
 
     def predict(message: str, history: List[Tuple[str, str]]) -> Tuple[str, List[Tuple[str, str]]]:
         if not message:
