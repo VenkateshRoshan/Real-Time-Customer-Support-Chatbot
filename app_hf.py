@@ -192,7 +192,7 @@ if __name__ == "__main__":
     demo = create_chat_interface()
     print("Starting Gradio server...")
     demo.launch(
-        share=True,
+        share=False,
         server_name="0.0.0.0",
         server_port=7860,  # Changed to 7860 for Gradio
         debug=True,

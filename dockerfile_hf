@@ -2,10 +2,10 @@ FROM python3.10-slim
 
 WORKDIR /app
 
-COPY app_hf.py /app/app_hf.py
-COPY src/ /app/src/
-
+COPY app_hf.py .
+COPY src/ .
 COPY requirements.txt .
+
 RUN pip install --no-cache-dir --upgrade pip
 RUN pip install --no-cache-dir torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cu121
 RUN pip install --no-cache-dir -r requirements.txt
