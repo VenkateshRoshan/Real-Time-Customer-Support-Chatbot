@@ -1,2 +1,4 @@
+# .huggingface.yml
+sdk: docker
 docker:
   dockerfile: dockerfile_hf
