@@ -95,7 +95,11 @@ def deploy_app(acc_id, region_name, role_arn, ecr_repo_name, endpoint_name="cust
         logger.info(f"Deploying model to endpoint: {endpoint_name}")
         logger.info(f"Deployment configuration: {deployment_config}")
         
-        predictor = model.deploy(**deployment_config)
+        predictor = model.deploy(**deployment_config,health_check_timeout_seconds=180,  # Optionally, increase the timeout
+        environment={
+            "SAGEMAKER_CONTAINER_PORT": "8080",
+            "FLASK_HEALTHCHECK_PORT": "8081",
+        })
         
         logger.info(f"Successfully deployed to endpoint: {endpoint_name}")
         return predictor

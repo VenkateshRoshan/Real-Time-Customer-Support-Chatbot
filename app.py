@@ -169,6 +169,22 @@ def create_chat_interface():
 
     return interface
 
+from flask import Flask, jsonify
+import threading
+
+app = Flask(__name__)
+
+# Health check endpoint for SageMaker
+@app.route("/ping", methods=["GET"])
+def ping():
+    return jsonify({"status": "ok"}), 200
+
+# Start Flask app on a separate thread
+def run_flask():
+    app.run(host="0.0.0.0", port=8081)  # Different port for Flask
+
+threading.Thread(target=run_flask).start()
+
 if __name__ == "__main__":
     demo = create_chat_interface()
     print("Starting Gradient server...")
