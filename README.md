@@ -4,8 +4,10 @@ emoji: 💬
 colorFrom: blue
 colorTo: indigo
 sdk: docker
+dockerfile: dockerfile_hf
 app_port: 7860
 pinned: false
+app_file: app_hf.py
 ---
 
 Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
