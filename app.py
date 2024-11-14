@@ -90,6 +90,11 @@ class CustomerSupportBot:
 
 def create_chat_interface():
     bot = CustomerSupportBot(model_path="/app/models")
+
+    # Function to run initial query
+    def initial_query():
+        welcome_message = "Hello! I'm your customer support assistant. How can I help you today?"
+        return "", [(None, welcome_message)]
     
     def predict(message: str, history: List[Tuple[str, str]]) -> Tuple[str, List[Tuple[str, str]]]:
         if not message:
@@ -166,6 +171,20 @@ def create_chat_interface():
         
         # Add keyboard shortcut for submit
         msg.change(lambda x: gr.update(interactive=bool(x.strip())), inputs=[msg], outputs=[submit])
+
+        print("Interface created successfully.")
+
+        # call the initial query function
+        # run a query first how are you and predict the output
+        print(predict("How are you", []))
+
+        # run a command which checks the resource usage
+        print(f'Bot Resource Usage : {bot.monitor_resources()}')
+
+        # show full system usage
+        print(f'CPU Percentage : {psutil.cpu_percent()}')
+        print(f'RAM Usage : {psutil.virtual_memory()}')
+        print(f'Swap Memory : {psutil.swap_memory()}')
 
     return interface
 
